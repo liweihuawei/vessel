@@ -3,11 +3,12 @@ package kubernetes
 import (
 	"time"
 
+	"log"
+
 	"github.com/containerops/vessel/models"
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
 	"k8s.io/kubernetes/pkg/watch"
-	"log"
 )
 
 func CreateRC(piplelineVersion *models.PipelineSpecTemplate, stageName string) error {
@@ -98,7 +99,7 @@ func WatchRCStatus(Namespace string, labelKey string, labelValue string, timeout
 			ch <- Error
 			return
 		}
-		log.Println(event.Type,event.Object.(*api.ReplicationController).Status)
+		log.Println(event.Type, event.Object.(*api.ReplicationController).Status)
 		if string(event.Type) == checkOp {
 			log.Println("Get RC event ok")
 			ch <- OK

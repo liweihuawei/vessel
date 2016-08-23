@@ -1,8 +1,9 @@
 package kubernetes
 
 import (
-	"github.com/containerops/vessel/models"
 	"log"
+
+	"github.com/containerops/vessel/models"
 )
 
 func StartPipeline(pipelineVersion *models.PipelineSpecTemplate, stageName string) error {
@@ -64,9 +65,9 @@ func WatchPipelineStatus(pipelineVersion *models.PipelineSpecTemplate, stageName
 
 	//todo:watch all pod start
 
-	podCount := 0
-	for _,specItem := range pipelineVersion.Spec{
-		if specItem.Name == stageName{
+	podCount := int32(0)
+	for _, specItem := range pipelineVersion.Spec {
+		if specItem.Name == stageName {
 			podCount = specItem.Replicas
 		}
 	}
@@ -85,7 +86,7 @@ func WatchPipelineStatus(pipelineVersion *models.PipelineSpecTemplate, stageName
 	service := OK
 	rcCount := 0
 	serviceCount := 0
-	for i := 0; i < 2 + podCount; i++ {
+	for i := int32(0); i < 2+podCount; i++ {
 		select {
 		case pod = <-podCh:
 			if pod == Error || pod == Timeout {

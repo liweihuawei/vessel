@@ -53,14 +53,14 @@ type StageSpec struct {
 	ProjectId           int64
 	PipelineId          int64
 	StageId             int64
-	Replicas            int    `json:"replicas"`
+	Replicas            int32  `json:"replicas"`
 	Dependence          string `json:"dependence"`
 	Kind                string `json:"kind"`
 	StatusCheckUrl      string `json:"statusCheckLink"`
 	StatusCheckInterval int64  `json:"statusCheckInterval"`
 	StatusCheckCount    int    `json:"statusCheckCount"`
 	Image               string `json:"image"`
-	Port                int    `json:"port"`
+	Port                int32  `json:"port"`
 	EnvName             string `json:"envName"`
 	EnvValue            string `json:"envValue"`
 }

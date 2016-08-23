@@ -3,11 +3,12 @@ package kubernetes
 import (
 	"time"
 
+	"log"
+
 	"github.com/containerops/vessel/models"
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
 	"k8s.io/kubernetes/pkg/watch"
-	"log"
 )
 
 // CheckPod check weather the pod spcified by namespace and podname is exist
@@ -64,7 +65,7 @@ func GetPodStatus(namespace string, podName string) string {
 }
 
 // WatchPodStatus return status of the operation(specified by checkOp) of the pod, OK, TIMEOUT.
-func WatchPodStatus(podNamespace string, labelKey string, labelValue string, timeout int64, checkOp string, sum int, ch chan string) {
+func WatchPodStatus(podNamespace string, labelKey string, labelValue string, timeout int64, checkOp string, sum int32, ch chan string) {
 	log.Printf("Enter WatchPodStatus")
 	if checkOp != string(watch.Deleted) && checkOp != string(watch.Added) {
 		log.Printf("Params checkOp err, checkOp: %v", checkOp)
@@ -86,7 +87,7 @@ func WatchPodStatus(podNamespace string, labelKey string, labelValue string, tim
 	}
 
 	t := time.NewTimer(time.Second * time.Duration(timeout))
-	for count := 0; count < sum; {
+	for count := int32(0); count < sum; {
 		select {
 		case event, ok := <-w.ResultChan():
 			if !ok {
@@ -94,7 +95,7 @@ func WatchPodStatus(podNamespace string, labelKey string, labelValue string, tim
 				ch <- Error
 				return
 			}
-			log.Println(event.Type,event.Object.(*api.Pod).Status.Phase)
+			log.Println(event.Type, event.Object.(*api.Pod).Status.Phase)
 			if string(event.Type) == watchType && event.Object.(*api.Pod).Status.Phase == "Running" {
 				ch <- OK
 				count++
