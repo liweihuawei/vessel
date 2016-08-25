@@ -28,7 +28,7 @@ func NewRESTClient(host string) *RESTClient {
 	}
 }
 
-func (c *RESTClient) Get(params Params) string {
+func (c *RESTClient) Get(params *Params) string {
 	path := params.BuildPath()
 	if path == "" {
 		return "Not supported yet"
@@ -44,12 +44,12 @@ func (c *RESTClient) Get(params Params) string {
 	return c.doRequest(req)
 }
 
-func (c *RESTClient) Create(params Params) string {
+func (c *RESTClient) Create(params *Params) string {
 	if params.Json == nil {
 		return "Empty request body."
 	}
 
-	path := params.BuildPath()
+	path := params.BuildPathForPost()
 	if path == "" {
 		return "Not supported yet"
 	}
@@ -64,7 +64,7 @@ func (c *RESTClient) Create(params Params) string {
 	return c.doRequest(req)
 }
 
-func (c *RESTClient) Delete(params Params) string {
+func (c *RESTClient) Delete(params *Params) string {
 	path := params.BuildPath()
 	if path == "" {
 		return "Not supported yet"

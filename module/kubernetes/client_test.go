@@ -1,19 +1,18 @@
 package kubernetes
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"testing"
 
-	"k8s.io/kubernetes/pkg/api/v1"
+	//"k8s.io/kubernetes/pkg/api/v1"
 )
 
 const (
-	HOST = "http://10.67.147.217:8080"
+	HOST = "http://127.0.0.1:8080"
 )
 
-var client RESTClient
+var client *RESTClient
 
 func init() {
 	client = NewRESTClient(HOST)

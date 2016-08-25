@@ -1,17 +1,9 @@
 {
-  "kind": "string",
-  "apiVersion": "string",
+  "kind": "Pod",
+  "apiVersion": "v1",
   "metadata": {
-    "name": "string",
-    "generateName": "string",
-    "namespace": "string",
-    "selfLink": "string",
-    "uid": "string",
-    "resourceVersion": "string",
-    "generation": 0,
-    "creationTimestamp": "string",
-    "deletionTimestamp": "string",
-    "deletionGracePeriodSeconds": 0
+    "name": "podtest",
+    "namespace": "vessel"
   },
   "spec": {
     "volumes": [
@@ -19,108 +11,13 @@
         "name": "string",
         "hostPath": {
           "path": "string"
-        },
-        "emptyDir": {
-          "medium": "string"
-        },
-        "gcePersistentDisk": {
-          "pdName": "string",
-          "fsType": "string",
-          "partition": 0,
-          "readOnly": true
-        },
-        "awsElasticBlockStore": {
-          "volumeID": "string",
-          "fsType": "string",
-          "partition": 0,
-          "readOnly": true
-        },
-        "gitRepo": {
-          "repository": "string",
-          "revision": "string"
-        },
-        "secret": {
-          "secretName": "string"
-        },
-        "nfs": {
-          "server": "string",
-          "path": "string",
-          "readOnly": true
-        },
-        "iscsi": {
-          "targetPortal": "string",
-          "iqn": "string",
-          "lun": 0,
-          "fsType": "string",
-          "readOnly": true
-        },
-        "glusterfs": {
-          "endpoints": "string",
-          "path": "string",
-          "readOnly": true
-        },
-        "persistentVolumeClaim": {
-          "claimName": "string",
-          "readOnly": true
-        },
-        "rbd": {
-          "monitors": [
-            "string"
-          ],
-          "image": "string",
-          "fsType": "string",
-          "pool": "string",
-          "user": "string",
-          "keyring": "string",
-          "secretRef": {
-            "name": "string"
-          },
-          "readOnly": true
-        },
-        "cinder": {
-          "volumeID": "string",
-          "fsType": "string",
-          "readOnly": true
-        },
-        "cephfs": {
-          "monitors": [
-            "string"
-          ],
-          "user": "string",
-          "secretFile": "string",
-          "secretRef": {
-            "name": "string"
-          },
-          "readOnly": true
-        },
-        "flocker": {
-          "datasetName": "string"
-        },
-        "downwardAPI": {
-          "items": [
-            {
-              "path": "string",
-              "fieldRef": {
-                "apiVersion": "string",
-                "fieldPath": "string"
-              }
-            }
-          ]
-        },
-        "fc": {
-          "targetWWNs": [
-            "string"
-          ],
-          "lun": 0,
-          "fsType": "string",
-          "readOnly": true
         }
       }
     ],
     "containers": [
       {
-        "name": "string",
-        "image": "string",
+        "name": "helloworld",
+        "image": "hello-world",
         "command": [
           "string"
         ],
@@ -131,89 +28,16 @@
         "ports": [
           {
             "name": "string",
-            "hostPort": 0,
-            "containerPort": 0,
-            "protocol": "string",
-            "hostIP": "string"
+            "hostPort": 9090,
+            "containerPort": 9090
           }
         ],
-        "env": [
-          {
-            "name": "string",
-            "value": "string",
-            "valueFrom": {
-              "fieldRef": {
-                "apiVersion": "string",
-                "fieldPath": "string"
-              }
-            }
-          }
-        ],
-        "resources": {},
-        "volumeMounts": [
-          {
-            "name": "string",
-            "readOnly": true,
-            "mountPath": "string"
-          }
-        ],
-        "livenessProbe": {
-          "exec": {
-            "command": [
-              "string"
-            ]
-          },
-          "httpGet": {
-            "path": "string",
-            "port": "string",
-            "host": "string",
-            "scheme": "string"
-          },
-          "tcpSocket": {
-            "port": "string"
-          },
-          "initialDelaySeconds": 0,
-          "timeoutSeconds": 0,
-          "periodSeconds": 0,
-          "successThreshold": 0,
-          "failureThreshold": 0
-        },
-        "readinessProbe": {
-          "exec": {
-            "command": [
-              "string"
-            ]
-          },
-          "httpGet": {
-            "path": "string",
-            "port": "string",
-            "host": "string",
-            "scheme": "string"
-          },
-          "tcpSocket": {
-            "port": "string"
-          },
-          "initialDelaySeconds": 0,
-          "timeoutSeconds": 0,
-          "periodSeconds": 0,
-          "successThreshold": 0,
-          "failureThreshold": 0
-        },
         "lifecycle": {
           "postStart": {
             "exec": {
               "command": [
                 "string"
               ]
-            },
-            "httpGet": {
-              "path": "string",
-              "port": "string",
-              "host": "string",
-              "scheme": "string"
-            },
-            "tcpSocket": {
-              "port": "string"
             }
           },
           "preStop": {
@@ -221,135 +45,10 @@
               "command": [
                 "string"
               ]
-            },
-            "httpGet": {
-              "path": "string",
-              "port": "string",
-              "host": "string",
-              "scheme": "string"
-            },
-            "tcpSocket": {
-              "port": "string"
             }
           }
         },
-        "terminationMessagePath": "string",
-        "imagePullPolicy": "string",
-        "securityContext": {
-          "capabilities": {
-            "add": [
-              {}
-            ],
-            "drop": [
-              {}
-            ]
-          },
-          "privileged": true,
-          "seLinuxOptions": {
-            "user": "string",
-            "role": "string",
-            "type": "string",
-            "level": "string"
-          },
-          "runAsUser": 0,
-          "runAsNonRoot": true
-        },
-        "stdin": true,
-        "stdinOnce": true,
-        "tty": true
-      }
-    ],
-    "restartPolicy": "string",
-    "terminationGracePeriodSeconds": 0,
-    "activeDeadlineSeconds": 0,
-    "dnsPolicy": "string",
-    "serviceAccountName": "string",
-    "serviceAccount": "string",
-    "nodeName": "string",
-    "hostNetwork": true,
-    "hostPID": true,
-    "hostIPC": true,
-    "securityContext": {
-      "seLinuxOptions": {
-        "user": "string",
-        "role": "string",
-        "type": "string",
-        "level": "string"
-      },
-      "runAsUser": 0,
-      "runAsNonRoot": true,
-      "supplementalGroups": [
-        {}
-      ],
-      "fsGroup": 0
-    },
-    "imagePullSecrets": [
-      {
-        "name": "string"
-      }
-    ]
-  },
-  "status": {
-    "phase": "string",
-    "conditions": [
-      {
-        "type": "string",
-        "status": "string",
-        "lastProbeTime": "string",
-        "lastTransitionTime": "string",
-        "reason": "string",
-        "message": "string"
-      }
-    ],
-    "message": "string",
-    "reason": "string",
-    "hostIP": "string",
-    "podIP": "string",
-    "startTime": "string",
-    "containerStatuses": [
-      {
-        "name": "string",
-        "state": {
-          "waiting": {
-            "reason": "string",
-            "message": "string"
-          },
-          "running": {
-            "startedAt": "string"
-          },
-          "terminated": {
-            "exitCode": 0,
-            "signal": 0,
-            "reason": "string",
-            "message": "string",
-            "startedAt": "string",
-            "finishedAt": "string",
-            "containerID": "string"
-          }
-        },
-        "lastState": {
-          "waiting": {
-            "reason": "string",
-            "message": "string"
-          },
-          "running": {
-            "startedAt": "string"
-          },
-          "terminated": {
-            "exitCode": 0,
-            "signal": 0,
-            "reason": "string",
-            "message": "string",
-            "startedAt": "string",
-            "finishedAt": "string",
-            "containerID": "string"
-          }
-        },
-        "ready": true,
-        "restartCount": 0,
-        "image": "string",
-        "imageID": "string",
-        "containerID": "string"
+        "imagePullPolicy": "IfNotPresent"
       }
     ]
   }

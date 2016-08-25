@@ -116,7 +116,8 @@ func NewParams(jstr []byte) (*Params, error) {
 	}
 
 	if r.APIVersion != "v1" {
-		log.Println("Not support version: ", r.APIVersion)
+		err = fmt.Errorf("Not supported version: ", r.APIVersion)
+		log.Println(err)
 		return nil, err
 	}
 
@@ -132,6 +133,20 @@ func NewParams(jstr []byte) (*Params, error) {
 
 //TODO add sub path etc.
 func (p *Params) BuildPath() (path string) {
+	path = p.BuildPathForPost()
+	if path == "" {
+		return
+	}
+
+	if p.Name != "" {
+		path += fmt.Sprintf("/%s", p.Name)
+	}
+
+	log.Println(path)
+	return
+}
+
+func (p *Params) BuildPathForPost() (path string) {
 	if p.ResourceType == UNKNOWN {
 		return
 	}
@@ -147,10 +162,6 @@ func (p *Params) BuildPath() (path string) {
 	}
 
 	path += p.GetType()
-
-	if p.Name != "" {
-		path += fmt.Sprintf("/%s", p.Name)
-	}
 
 	log.Println(path)
 	return
