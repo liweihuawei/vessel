@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"io/ioutil"
+	//"io/ioutil"
 	"log"
 	"testing"
 
@@ -9,17 +9,54 @@ import (
 )
 
 const (
-	HOST = "http://127.0.0.1:8080"
+	HOST = "127.0.0.1:8080"
 )
 
 var client *RESTClient
 
 func init() {
-	client = NewRESTClient(HOST)
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
+	client, _ = NewRESTClient(HOST)
 }
 
-func TestResource(t *testing.T) {
-	data, err := ioutil.ReadFile("./testpod.yaml")
+func TestNamespace(t *testing.T) {
+	params := NewParamsWithResourceType(NAMESPACES, "vessel", "", false, false)
+	log.Println(params)
+
+	body, err := params.EncodingParams()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	result := client.Create(params, body)
+	log.Println(result.StatusCode)
+	if result.Err != nil {
+		t.Error(result.Err)
+		return
+	}
+	log.Println(string(result.Body))
+
+	result = client.Get(params)
+	log.Println(result.StatusCode)
+	if result.Err != nil {
+		t.Error(result.Err)
+		return
+	}
+	log.Println(string(result.Body))
+
+	result = client.Delete(params)
+	log.Println(result.StatusCode)
+	if result.Err != nil {
+		t.Error(result.Err)
+		return
+	}
+	log.Println(string(result.Body))
+}
+
+/*
+func PostGetDeleteResourceWithJson(t *testing.T, fileName string) {
+	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		t.Error(err)
 		return
@@ -40,3 +77,9 @@ func TestResource(t *testing.T) {
 	result = client.Delete(params)
 	log.Println(result)
 }
+
+func TestResource(t *testing.T) {
+	PostGetDeleteResourceWithJson(t, "./testpod.yaml")
+	PostGetDeleteResourceWithJson(t, "./testrc.yaml")
+}
+*/

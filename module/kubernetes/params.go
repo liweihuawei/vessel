@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 )
 
 type ResourceType int
@@ -93,7 +94,6 @@ type Params struct {
 	Namespace    string
 	IsVisitProxy bool
 	IsSetWatcher bool
-	Json         []byte
 }
 
 type RawParams struct {
@@ -107,7 +107,17 @@ type ParamsMetaData struct {
 	Namespace string `json:"namespace"`
 }
 
-func NewParams(jstr []byte) (*Params, error) {
+func NewParamsWithResourceType(resource ResourceType, name, namespace string, isProxy, isWatcher bool) *Params {
+	return &Params{
+		ResourceType: resource,
+		Name:         name,
+		Namespace:    namespace,
+		IsVisitProxy: isProxy,
+		IsSetWatcher: isWatcher,
+	}
+}
+
+func NewParamsWithJson(jstr []byte) (*Params, error) {
 	var r RawParams
 	err := json.Unmarshal(jstr, &r)
 	if err != nil {
@@ -127,8 +137,24 @@ func NewParams(jstr []byte) (*Params, error) {
 		Namespace:    r.Metadata.Namespace,
 		IsVisitProxy: false,
 		IsSetWatcher: false,
-		Json:         jstr,
 	}, nil
+}
+
+func (p *Params) EncodingParams() ([]byte, error) {
+	raw := &RawParams{
+		Kind: func(s string) string {
+			s = strings.TrimRight(s, "s")
+			upper := strings.ToUpper(s)
+			return upper[:1] + s[1:]
+
+		}(p.GetType()),
+		APIVersion: "v1",
+		Metadata: ParamsMetaData{
+			Name:      p.Name,
+			Namespace: p.Namespace,
+		},
+	}
+	return json.Marshal(raw)
 }
 
 //TODO add sub path etc.
@@ -157,11 +183,11 @@ func (p *Params) BuildPathForPost() (path string) {
 		path = "/watch"
 	}
 
-	if p.Namespace != "" {
-		path += fmt.Sprintf("/namespaces/%s/", p.Namespace)
+	if p.Namespace != "" && p.GetType() != "namespaces" {
+		path += fmt.Sprintf("/namespaces/%s", p.Namespace)
 	}
 
-	path += p.GetType()
+	path += fmt.Sprintf("/%s", p.GetType())
 
 	log.Println(path)
 	return
