@@ -188,3 +188,32 @@ func (d *Deployment) Deploy() *models.StageResult {
 		return nil
 	}
 }
+
+func (d *Deployment) Undeploy() *models.StageResult {
+	switch d.DeployType {
+	case models.STAGECONTAINER:
+		detail, err := UndeployInK8S(d.K8S)
+		result := &models.StageResult{
+			ID:        d.ID,
+			Name:      d.Name,
+			Namespace: d.Namespace,
+			Detail:    detail,
+		}
+		if err != nil {
+			if strings.Contains(err.Error(), models.ResultTimeout) {
+				result.Status = models.ResultTimeout
+			} else {
+				result.Status = models.ResultFailed
+			}
+		} else {
+			result.Status = models.ResultSuccess
+		}
+		return result
+	case models.STAGEVM:
+		return nil
+	case models.STAGEPC:
+		return nil
+	default:
+		return nil
+	}
+}

@@ -48,6 +48,7 @@ func DeployInK8S(data *K8SData) (detail string, err error) {
 	}
 
 	return createService(client, data)
+	//TODO close client
 }
 
 //Check namespace, create one if not exist
@@ -139,6 +140,54 @@ func createService(client *kubernetes.RESTClient, data *K8SData) (string, error)
 	log.Println("Create Service Code: ", result.StatusCode)
 
 	if result.StatusCode == K8S_CREATED {
+		return string(result.Body), nil
+	}
+
+	return string(result.Body), errors.New(fmt.Sprintf("Respond code is: ", result.StatusCode))
+}
+
+func UndeployInK8S(data *K8SData) (detail string, err error) {
+	client, err := kubernetes.NewRESTClient(fmt.Sprintf("%s:%s", setting.RunTime.K8s.Host, setting.RunTime.K8s.Port))
+	if err != nil {
+		detail = err.Error()
+		return
+	}
+
+	detail, err = deleteRC(client, data)
+	if err != nil {
+		return detail, err
+	}
+
+	return deleteService(client, data)
+	//TODO close client
+}
+
+func deleteRC(client *kubernetes.RESTClient, data *K8SData) (string, error) {
+	params := kubernetes.NewParamsWithResourceType(kubernetes.REPLICATIONCONTROLLERS, data.Name, data.Namespace, false, false)
+
+	result := client.Delete(params)
+	if result.Err != nil {
+		return result.Err.Error(), result.Err
+	}
+	log.Println("Delete ReplicationController Code: ", result.StatusCode)
+
+	if result.StatusCode == K8S_OK {
+		return string(result.Body), nil
+	}
+
+	return string(result.Body), errors.New(fmt.Sprintf("Respond code is: ", result.StatusCode))
+}
+
+func deleteService(client *kubernetes.RESTClient, data *K8SData) (string, error) {
+	params := kubernetes.NewParamsWithResourceType(kubernetes.SERVICES, data.Name, data.Namespace, false, false)
+
+	result := client.Delete(params)
+	if result.Err != nil {
+		return result.Err.Error(), result.Err
+	}
+	log.Println("Delete Service Code: ", result.StatusCode)
+
+	if result.StatusCode == K8S_OK {
 		return string(result.Body), nil
 	}
 
