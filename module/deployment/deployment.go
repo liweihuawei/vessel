@@ -6,6 +6,7 @@ import (
 
 	"github.com/containerops/vessel/models"
 	"k8s.io/kubernetes/pkg/api/v1"
+	"k8s.io/kubernetes/pkg/util/intstr"
 )
 
 type Deployment struct {
@@ -23,11 +24,12 @@ func NewDeployment(stage *models.Stage) *Deployment {
 	case models.STAGECONTAINER:
 		*replicas = int32(stage.Replicas)
 		data.K8S = &K8SData{
-			Name:      stage.Name,
-			Namespace: stage.Namespace,
-			Replicas:  replicas,
-			Labels:    map[string]string{"app": stage.Name},
-			PodSpec:   newPodSpec(stage.Artifacts, stage.Volumes),
+			Name:        stage.Name,
+			Namespace:   stage.Namespace,
+			Replicas:    replicas,
+			Labels:      map[string]string{"app": stage.Name},
+			PodSpec:     newPodSpec(stage.Artifacts, stage.Volumes),
+			ServiceSpec: newServiceSpec(stage.Ports, stage.Artifacts[0].Container.Ports),
 		}
 	case models.STAGEVM:
 		return nil
@@ -128,6 +130,33 @@ func newPodSpec(a []models.Artifact, v []models.Volume) *v1.PodSpec {
 	return &v1.PodSpec{
 		Volumes:    volumes,
 		Containers: containers,
+	}
+}
+
+func newServiceSpec(s []models.ServicePort, c []models.ContainerPort) *v1.ServiceSpec {
+	size := len(s)
+	if size == 0 {
+		log.Println("Length is: ", len(s))
+		return nil
+	}
+
+	ports := make([]v1.ServicePort, size)
+	for i := 0; i < size; i++ {
+		ports[i] = v1.ServicePort{
+			Name: s[i].Name,
+			Port: s[i].Port,
+			TargetPort: func() intstr.IntOrString {
+				for _, v := range c {
+					if v.Name == s[i].Name {
+						return intstr.FromInt(int(v.ContainerPort))
+					}
+				}
+				return intstr.FromInt(int(s[i].Port))
+			}(),
+		}
+	}
+	return &v1.ServiceSpec{
+		Ports: ports,
 	}
 }
 

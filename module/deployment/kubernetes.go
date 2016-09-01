@@ -121,4 +121,26 @@ func createService(client *kubernetes.RESTClient, data *K8SData) (string, error)
 		return err.Error(), err
 	}
 
+	buffer := make([][]byte, 4)
+	buffer[2], err = data.EncodingData(kubernetes.SERVICES)
+	if err != nil {
+		return err.Error(), err
+	}
+	buffer[0] = bytes.TrimRight(meta, "}")
+	buffer[1] = []byte("},\"spec\":")
+	buffer[3] = []byte("}")
+	body := bytes.Join(buffer, []byte(""))
+	log.Println(string(body))
+
+	result := client.Create(params, body)
+	if result.Err != nil {
+		return result.Err.Error(), result.Err
+	}
+	log.Println("Create Service Code: ", result.StatusCode)
+
+	if result.StatusCode == K8S_CREATED {
+		return string(result.Body), nil
+	}
+
+	return string(result.Body), errors.New(fmt.Sprintf("Respond code is: ", result.StatusCode))
 }

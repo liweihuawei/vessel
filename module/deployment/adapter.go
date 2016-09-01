@@ -21,6 +21,7 @@ type K8SData struct {
 	Replicas  *int32
 	Labels    map[string]string
 	*v1.PodSpec
+	*v1.ServiceSpec
 }
 
 func (k *K8SData) EncodingData(r kubernetes.ResourceType) ([]byte, error) {
@@ -55,10 +56,12 @@ func (k *K8SData) encodingRC() ([]byte, error) {
 }
 
 func (k *K8SData) encodingService() ([]byte, error) {
-	servicespec := v1.ServiceSpec{
-		Selector: k.Labels,
+	if k.ServiceSpec == nil {
+		return nil, errors.New("Empty ServiceSpec")
 	}
-	return json.Marshal(&servicespec)
+
+	k.ServiceSpec.Selector = k.Labels
+	return json.Marshal(k.ServiceSpec)
 }
 
 type VMData struct {
