@@ -47,8 +47,8 @@ func NewDeployment(stage *models.Stage) *Deployment {
 }
 
 func newPodSpec(a []models.Artifact, v []models.Volume) *v1.PodSpec {
-	if len(a) != len(v) {
-		log.Println("Length dismatch.")
+	if len(a) == 0 || len(a) != len(v) {
+		log.Println("Length is: ", len(a))
 		return nil
 	}
 
@@ -84,18 +84,35 @@ func newPodSpec(a []models.Artifact, v []models.Volume) *v1.PodSpec {
 				}
 				return earr
 			}(a[i].Container.Env),
-			Lifecycle: &v1.Lifecycle{
-				PostStart: &v1.Handler{
-					Exec: &v1.ExecAction{
-						Command: a[i].Lifecycle.Before,
-					},
-				},
-				PreStop: &v1.Handler{
-					Exec: &v1.ExecAction{
-						Command: a[i].Lifecycle.After,
-					},
-				},
-			},
+			Lifecycle: func() *v1.Lifecycle {
+				var postStart *v1.Handler
+				var preStop *v1.Handler
+
+				if a[i].Lifecycle.Before != nil {
+					postStart = &v1.Handler{
+						Exec: &v1.ExecAction{
+							Command: a[i].Lifecycle.Before,
+						},
+					}
+				}
+
+				if a[i].Lifecycle.After != nil {
+					preStop = &v1.Handler{
+						Exec: &v1.ExecAction{
+							Command: a[i].Lifecycle.After,
+						},
+					}
+				}
+
+				if postStart != nil || preStop != nil {
+					return &v1.Lifecycle{
+						PostStart: postStart,
+						PreStop:   preStop,
+					}
+				} else {
+					return nil
+				}
+			}(),
 		}
 
 		volumes[i] = v1.Volume{

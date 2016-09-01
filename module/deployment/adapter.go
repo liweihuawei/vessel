@@ -27,6 +27,8 @@ func (k *K8SData) EncodingData(r kubernetes.ResourceType) ([]byte, error) {
 	switch r {
 	case kubernetes.REPLICATIONCONTROLLERS:
 		return k.encodingRC()
+	case kubernetes.SERVICES:
+		return k.encodingService()
 	default:
 		return nil, errors.New("Unsupported Resource")
 	}
@@ -50,6 +52,13 @@ func (k *K8SData) encodingRC() ([]byte, error) {
 		},
 	}
 	return json.Marshal(&rcspec)
+}
+
+func (k *K8SData) encodingService() ([]byte, error) {
+	servicespec := v1.ServiceSpec{
+		Selector: k.Labels,
+	}
+	return json.Marshal(&servicespec)
 }
 
 type VMData struct {

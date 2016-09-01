@@ -42,7 +42,12 @@ func DeployInK8S(data *K8SData) (detail string, err error) {
 		}
 	}
 
-	return createRC(client, data)
+	detail, err = createRC(client, data)
+	if err != nil {
+		return detail, err
+	}
+
+	return createService(client, data)
 }
 
 //Check namespace, create one if not exist
@@ -52,6 +57,7 @@ func newNamespace(client *kubernetes.RESTClient, namespace string) (string, erro
 	if result.Err != nil {
 		return result.Err.Error(), result.Err
 	}
+	log.Println("Get Namespace Code: ", result.StatusCode)
 
 	if result.StatusCode == K8S_OK {
 		return string(result.Body), nil
@@ -67,6 +73,8 @@ func newNamespace(client *kubernetes.RESTClient, namespace string) (string, erro
 		if result.Err != nil {
 			return result.Err.Error(), result.Err
 		}
+		log.Println("Create Namespace Code: ", result.StatusCode)
+
 		if result.StatusCode == K8S_CREATED {
 			return string(result.Body), nil
 		}
@@ -97,9 +105,20 @@ func createRC(client *kubernetes.RESTClient, data *K8SData) (string, error) {
 	if result.Err != nil {
 		return result.Err.Error(), result.Err
 	}
+	log.Println("Create ReplicationController Code: ", result.StatusCode)
+
 	if result.StatusCode == K8S_CREATED {
 		return string(result.Body), nil
 	}
 
 	return string(result.Body), errors.New(fmt.Sprintf("Respond code is: ", result.StatusCode))
+}
+
+func createService(client *kubernetes.RESTClient, data *K8SData) (string, error) {
+	params := kubernetes.NewParamsWithResourceType(kubernetes.SERVICES, data.Name, data.Namespace, false, false)
+	meta, err := params.EncodingParams()
+	if err != nil {
+		return err.Error(), err
+	}
+
 }

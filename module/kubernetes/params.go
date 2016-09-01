@@ -97,14 +97,14 @@ type Params struct {
 }
 
 type RawParams struct {
-	Kind       string         `json:"kind"`
-	APIVersion string         `json:"apiVersion"`
-	Metadata   ParamsMetaData `json:"metadata"`
+	Kind       string          `json:"kind"`
+	APIVersion string          `json:"apiVersion"`
+	Metadata   *ParamsMetaData `json:"metadata,omitempty"`
 }
 
 type ParamsMetaData struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
+	Name      string `json:"name,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
 }
 
 func NewParamsWithResourceType(resource ResourceType, name, namespace string, isProxy, isWatcher bool) *Params {
@@ -153,10 +153,16 @@ func (p *Params) EncodingParams() ([]byte, error) {
 			}
 		}(p.GetType()),
 		APIVersion: "v1",
-		Metadata: ParamsMetaData{
-			Name:      p.Name,
-			Namespace: p.Namespace,
-		},
+		Metadata: func() *ParamsMetaData {
+			if p.Name == "" && p.Namespace == "" {
+				return nil
+			} else {
+				return &ParamsMetaData{
+					Name:      p.Name,
+					Namespace: p.Namespace,
+				}
+			}
+		}(),
 	}
 	return json.Marshal(raw)
 }
