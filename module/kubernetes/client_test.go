@@ -79,7 +79,7 @@ func PostGetDeleteResourceWithJson(t *testing.T, fileName string) {
 }
 
 func TestResource(t *testing.T) {
-	PostGetDeleteResourceWithJson(t, "./testpod.yaml")
-	PostGetDeleteResourceWithJson(t, "./testrc.yaml")
+	PostGetDeleteResourceWithJson(t, "./testpod.json")
+	PostGetDeleteResourceWithJson(t, "./testrc.json")
 }
 */

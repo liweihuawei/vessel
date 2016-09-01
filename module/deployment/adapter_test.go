@@ -32,7 +32,6 @@ func TestDeploy(t *testing.T) {
 	}
 
 	deployment := NewDeployment(stage)
-	log.Println(deployment)
 	result := deployment.Deploy()
 	log.Println(result)
 }

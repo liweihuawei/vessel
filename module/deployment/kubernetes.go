@@ -1,8 +1,10 @@
 package deployment
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/containerops/vessel/module/kubernetes"
 	"github.com/containerops/vessel/setting"
@@ -26,23 +28,21 @@ const (
 	K8S_SERVERTIMEOUT       = 504
 )
 
-func DeployInK8S(namespace string, data []K8SData) (detail string, err error) {
+func DeployInK8S(data *K8SData) (detail string, err error) {
 	client, err := kubernetes.NewRESTClient(fmt.Sprintf("%s:%s", setting.RunTime.K8s.Host, setting.RunTime.K8s.Port))
 	if err != nil {
 		detail = err.Error()
 		return
 	}
 
-	if namespace != "" {
-		detail, err = newNamespace(client, namespace)
+	if data.Namespace != "" {
+		detail, err = newNamespace(client, data.Namespace)
 		if err != nil {
 			return detail, err
 		}
-	} else {
-		detail = ""
 	}
 
-	return
+	return createRC(client, data)
 }
 
 //Check namespace, create one if not exist
@@ -70,6 +70,35 @@ func newNamespace(client *kubernetes.RESTClient, namespace string) (string, erro
 		if result.StatusCode == K8S_CREATED {
 			return string(result.Body), nil
 		}
+	}
+
+	return string(result.Body), errors.New(fmt.Sprintf("Respond code is: ", result.StatusCode))
+}
+
+func createRC(client *kubernetes.RESTClient, data *K8SData) (string, error) {
+	params := kubernetes.NewParamsWithResourceType(kubernetes.REPLICATIONCONTROLLERS, data.Name, data.Namespace, false, false)
+	meta, err := params.EncodingParams()
+	if err != nil {
+		return err.Error(), err
+	}
+
+	buffer := make([][]byte, 4)
+	buffer[2], err = data.EncodingData(kubernetes.REPLICATIONCONTROLLERS)
+	if err != nil {
+		return err.Error(), err
+	}
+	buffer[0] = bytes.TrimRight(meta, "}")
+	buffer[1] = []byte("},\"spec\":")
+	buffer[3] = []byte("}")
+	body := bytes.Join(buffer, []byte(""))
+	log.Println(string(body))
+
+	result := client.Create(params, body)
+	if result.Err != nil {
+		return result.Err.Error(), result.Err
+	}
+	if result.StatusCode == K8S_CREATED {
+		return string(result.Body), nil
 	}
 
 	return string(result.Body), errors.New(fmt.Sprintf("Respond code is: ", result.StatusCode))

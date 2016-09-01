@@ -143,10 +143,14 @@ func NewParamsWithJson(jstr []byte) (*Params, error) {
 func (p *Params) EncodingParams() ([]byte, error) {
 	raw := &RawParams{
 		Kind: func(s string) string {
-			s = strings.TrimRight(s, "s")
-			upper := strings.ToUpper(s)
-			return upper[:1] + s[1:]
-
+			switch s {
+			case "replicationcontrollers":
+				return "ReplicationController"
+			default:
+				s = strings.TrimRight(s, "s")
+				upper := strings.ToUpper(s)
+				return upper[:1] + s[1:]
+			}
 		}(p.GetType()),
 		APIVersion: "v1",
 		Metadata: ParamsMetaData{
