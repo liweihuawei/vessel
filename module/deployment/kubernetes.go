@@ -165,7 +165,16 @@ func UndeployInK8S(data *K8SData) (detail string, err error) {
 func deleteRC(client *kubernetes.RESTClient, data *K8SData) (string, error) {
 	params := kubernetes.NewParamsWithResourceType(kubernetes.REPLICATIONCONTROLLERS, data.Name, data.Namespace, false, false)
 
-	result := client.Delete(params)
+	patch := []byte(`[{"op":"replace","path":"/spec/replicas","value":0}]`)
+	result := client.Update(params, patch)
+	if result.Err != nil {
+		return result.Err.Error(), result.Err
+	}
+	if result.StatusCode != K8S_OK {
+		return string(result.Body), errors.New(fmt.Sprintf("Respond code is: ", result.StatusCode))
+	}
+
+	result = client.Delete(params)
 	if result.Err != nil {
 		return result.Err.Error(), result.Err
 	}

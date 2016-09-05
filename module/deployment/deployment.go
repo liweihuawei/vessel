@@ -59,9 +59,15 @@ func newPodSpec(a []models.Artifact, v []models.Volume) *v1.PodSpec {
 	volumes := make([]v1.Volume, size)
 	for i := 0; i < size; i++ {
 		containers[i] = v1.Container{
-			Name:       a[i].Name,
-			Image:      a[i].Path,
-			Command:    a[i].Lifecycle.Runtime,
+			Name:  a[i].Name,
+			Image: a[i].Path,
+			Command: func() []string {
+				if a[i].Lifecycle != nil && a[i].Lifecycle.Runtime != nil {
+					return a[i].Lifecycle.Runtime
+				} else {
+					return nil
+				}
+			}(),
 			WorkingDir: a[i].Container.WorkingDir,
 			Ports: func(ports []models.ContainerPort) []v1.ContainerPort {
 				psize := len(ports)
@@ -87,6 +93,10 @@ func newPodSpec(a []models.Artifact, v []models.Volume) *v1.PodSpec {
 				return earr
 			}(a[i].Container.Env),
 			Lifecycle: func() *v1.Lifecycle {
+				if a[i].Lifecycle == nil {
+					return nil
+				}
+
 				var postStart *v1.Handler
 				var preStop *v1.Handler
 
